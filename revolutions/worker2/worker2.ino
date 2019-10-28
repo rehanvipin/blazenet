@@ -11,7 +11,7 @@
 #include <DHT.h>
 
 #define DHTPIN 2
-#define DHTTYPE DHT11
+#define DHTTYPE DHT22
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -20,7 +20,7 @@ RF24 radio(7,8);
 RF24Network network(radio);          // Network uses that radio
 
 const uint16_t clusterhead = 01;        // Address of our node in Octal format
-const uint16_t worker1 = 011;       // Address of the other node in Octal format
+const uint16_t worker2 = 021;       // Address of the other node in Octal format
 
 const unsigned long interval = 2000; 
 
@@ -43,28 +43,22 @@ void setup(void)
  
   SPI.begin();
   radio.begin();
-  network.begin(/*channel*/ 90, /*node address*/ worker1);
+  network.begin(/*channel*/ 90, /*node address*/ worker2);
   dht.begin();
 }
 
 void loop() {
   
   network.update();                          // Check the network regularly
-  
 
   
   unsigned long now = millis();              // If it's time to send a message, send it!
   if ( now - last_sent >= interval  )
   {
-    int gasval = analogRead(gasPin);
-    Serial.print(gasval);
-    Serial.print(",");
-    Serial.print(dht.readHumidity());
-    Serial.print(",");
-    Serial.println(dht.readTemperature());
     last_sent = now;
+    int gasval = analogRead(gasPin);
     Serial.print("Sending...");
-    payload_t payload = { 1, gasval, dht.readHumidity(), dht.readTemperature() };
+    payload_t payload = { 2, gasval, dht.readHumidity(), dht.readTemperature() };
     RF24NetworkHeader header(/*to node*/ clusterhead);
     bool ok = network.write(header,&payload,sizeof(payload));
     if (ok)

@@ -8,6 +8,7 @@ const uint16_t base = 00;
 const uint16_t clusterhead = 01;
 
 struct payload_t{
+  int id;
   int ppm;
   float humidity;
   float temperature;
@@ -22,14 +23,21 @@ void setup(void) {
 
 void loop() {
   RF24NetworkHeader header;
-  payload_t payload;
+  payload_t payloads[3];
 
   network.update();
 
   while(network.available()){
-    network.read(header, &payload, sizeof(payload));
-    Serial.println(payload.ppm);
-    Serial.println(payload.humidity);
-    Serial.println(payload.temperature);
+    network.read(header, &payloads, sizeof(payloads));
+    for(int i=0;i<3;i++)
+    {
+      Serial.print(payloads[i].id);
+      Serial.print(",");
+      Serial.print(payloads[i].ppm);
+      Serial.print(",");
+      Serial.print(payloads[i].humidity);
+      Serial.print(",");
+      Serial.println(payloads[i].temperature);
+    }
   }
 }
